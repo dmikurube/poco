@@ -1,0 +1,3 @@
+rootProject.name = 'poco'
+
+include ':poco-core'
