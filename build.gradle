@@ -5,6 +5,7 @@ repositories {
 subprojects {
     apply plugin: 'java'
     apply plugin: 'checkstyle'
+    apply plugin: 'findbugs'
 
     group = 'org.microost.poco'
     version = '0.1.0-SNAPSHOT'
@@ -39,5 +40,9 @@ subprojects {
         configFile = file("${rootProject.projectDir}/config/checkstyle/checkstyle.xml")
         ignoreFailures = false
         maxWarnings = 0  // https://github.com/gradle/gradle/issues/881
+    }
+
+    findbugs {
+        ignoreFailures = false
     }
 }
