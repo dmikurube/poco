@@ -28,6 +28,34 @@ subprojects {
         }
     }
 
+    javadoc {
+        options {
+            locale = 'en_US'
+            encoding = 'UTF-8'
+        }
+    }
+
+    task testsJar(type: Jar, dependsOn: classes) {
+        classifier = 'tests'
+        from sourceSets.test.output
+    }
+
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from javadoc.destinationDir
+    }
+
+    artifacts {
+        archives testsJar
+        archives sourcesJar
+        archives javadocJar
+    }
+
     tasks.withType(Checkstyle) {
         reports {
             // Not to skip up-to-date checkstyles.
