@@ -4,6 +4,8 @@ repositories {
 
 subprojects {
     apply plugin: 'java'
+    apply plugin: 'maven'
+    apply plugin: 'maven-publish'
     apply plugin: 'checkstyle'
     apply plugin: 'findbugs'
 
@@ -54,6 +56,17 @@ subprojects {
         archives testsJar
         archives sourcesJar
         archives javadocJar
+    }
+
+    publishing {
+        publications {
+            Publication(MavenPublication) {
+                from components.java
+                artifact testsJar
+                artifact sourcesJar
+                artifact javadocJar
+            }
+        }
     }
 
     tasks.withType(Checkstyle) {
