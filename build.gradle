@@ -8,6 +8,7 @@ subprojects {
     apply plugin: 'maven-publish'
     apply plugin: 'checkstyle'
     apply plugin: 'findbugs'
+    apply plugin: 'jacoco'
 
     group = 'org.microost.poco'
     version = '0.1.0-SNAPSHOT'
