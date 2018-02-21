@@ -17,13 +17,13 @@ final class ConfigMap implements Map<String, Object> {
         this.contents = Collections.unmodifiableMap(contents);
     }
 
-    static ConfigMap of(final Map<String, Object> contents) {
+    static ConfigMap of(final Map<String, ? extends Object> contents) {
         if (contents instanceof ConfigMap) {
             return (ConfigMap) contents;
         }
 
         final LinkedHashMap<String, Object> built = new LinkedHashMap<>();
-        for (final Map.Entry<? extends Object, Object> entry : contents.entrySet()) {
+        for (final Map.Entry<? extends Object, ? extends Object> entry : contents.entrySet()) {
             final Object keyObject = entry.getKey();
             final String key;
             if (keyObject instanceof String) {

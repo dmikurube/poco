@@ -12,11 +12,15 @@ import java.util.Map;
  * Immutable List which consists only of String, ConfigList, and ConfigMap.
  */
 final class ConfigList implements List<Object> {
-    private ConfigList(final List<Object> contents) {
-        this.contents = contents;
+    private ConfigList(final ArrayList<Object> contents) {
+        this.contents = Collections.unmodifiableList(contents);
     }
 
-    static ConfigList of(final List<Object> contents) {
+    private ConfigList(final List<Object> contents, final boolean dummy) {
+        this.contents = Collections.unmodifiableList(contents);
+    }
+
+    static ConfigList of(final List<? extends Object> contents) {
         if (contents instanceof ConfigList) {
             return (ConfigList) contents;
         }
@@ -43,7 +47,7 @@ final class ConfigList implements List<Object> {
                 }
             }
         }
-        return new ConfigList(Collections.unmodifiableList(built));
+        return new ConfigList(built);
     }
 
     // Query Operations
@@ -188,7 +192,7 @@ final class ConfigList implements List<Object> {
 
     @Override
     public ConfigList subList(final int fromIndex, final int toIndex) {
-        return new ConfigList(this.contents.subList(fromIndex, toIndex));
+        return new ConfigList(this.contents.subList(fromIndex, toIndex), false);
     }
 
     @Override
