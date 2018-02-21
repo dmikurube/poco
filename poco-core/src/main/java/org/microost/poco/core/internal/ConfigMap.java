@@ -1,19 +1,58 @@
 package org.microost.poco.core.internal;
 
 import java.util.Collection;
-import java.util.Comparator;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
 
-final class ConfigMap implements SortedMap<String, Object> {
-    private ConfigMap(final SortedMap<String, Object> contents) {
-        this.contents = contents;
+/**
+ * Immutable Map which consists only of String, ConfigList, and ConfigMap.
+ *
+ * <p>This Map implementation preserves the insertion-order such as {@code java.util.LinkedHashMap}.
+ */
+final class ConfigMap implements Map<String, Object> {
+    private ConfigMap(final LinkedHashMap<String, Object> contents) {
+        this.contents = Collections.unmodifiableMap(contents);
     }
 
-    static ConfigMap of(final SortedMap<String, Object> contents) {
-        // TODO: Deep clone with checking the contents are ConfigList, ConfigMap, or String.
-        return new ConfigMap(contents);
+    static ConfigMap of(final Map<String, Object> contents) {
+        if (contents instanceof ConfigMap) {
+            return (ConfigMap) contents;
+        }
+
+        final LinkedHashMap<String, Object> built = new LinkedHashMap<>();
+        for (final Map.Entry<? extends Object, Object> entry : contents.entrySet()) {
+            final Object keyObject = entry.getKey();
+            final String key;
+            if (keyObject instanceof String) {
+                key = (String) keyObject;
+            } else {
+                throw new IllegalArgumentException("Key of Map must be String.");
+            }
+            final Object value = entry.getValue();
+            if (value instanceof String
+                        || value instanceof ConfigList
+                        || value instanceof ConfigMap) {
+                built.put(key, value);
+            } else if (value instanceof List) {
+                @SuppressWarnings("unchecked")
+                final List<Object> valueList = (List<Object>) value;
+                built.put(key, ConfigList.of(valueList));
+            } else if (value instanceof Map) {
+                @SuppressWarnings("unchecked")
+                final Map<String, Object> valueMap = (Map<String, Object>) value;
+                built.put(key, ConfigMap.of(valueMap));
+            } else {
+                if (value instanceof Collection) {
+                    throw new IllegalArgumentException("Unordered java.util.Collection cannot be used for ConfigList.");
+                } else {
+                    throw new IllegalArgumentException(entry.getClass().toString() + " cannot be used.");
+                }
+            }
+        }
+        return new ConfigMap(built);
     }
 
     @Override
@@ -98,39 +137,12 @@ final class ConfigMap implements SortedMap<String, Object> {
         return this.contents.hashCode() ^ CLASS_HASH_CODE;
     }
 
-    // SortedMap
-
     @Override
-    public Comparator<? super String> comparator() {
-        return this.contents.comparator();
-    }
-
-    @Override
-    public ConfigMap subMap(final String fromKey, final String toKey) {
-        return new ConfigMap(this.contents.subMap(fromKey, toKey));
-    }
-
-    @Override
-    public ConfigMap headMap(final String toKey) {
-        return new ConfigMap(this.contents.headMap(toKey));
-    }
-
-    @Override
-    public ConfigMap tailMap(final String fromKey) {
-        return new ConfigMap(this.contents.tailMap(fromKey));
-    }
-
-    @Override
-    public String firstKey() {
-        return this.contents.firstKey();
-    }
-
-    @Override
-    public String lastKey() {
-        return this.contents.lastKey();
+    public String toString() {
+        return this.contents.toString();
     }
 
     private static final int CLASS_HASH_CODE = ConfigMap.class.hashCode();
 
-    private final SortedMap<String, Object> contents;
+    private final Map<String, Object> contents;
 }
