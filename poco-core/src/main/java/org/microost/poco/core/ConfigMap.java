@@ -10,14 +10,25 @@ import java.util.Set;
 /**
  * Immutable Map which consists only of String, ConfigList, and ConfigMap.
  *
+ * <p>This class is {@code public} so that third-party extending libraries like Binders can handle
+ * this. It is however usually discouraged for users to use this {@link ConfigMap} class directly.
+ * For example, using this class in method signatures would force callers to depend explicitly on
+ * this library and {@link ConfigMap}.
+ *
  * <p>This Map implementation preserves the insertion-order such as {@code java.util.LinkedHashMap}.
  */
-final class ConfigMap implements Map<String, Object> {
+public final class ConfigMap implements Map<String, Object> {
     private ConfigMap(final LinkedHashMap<String, Object> contents) {
         this.contents = Collections.unmodifiableMap(contents);
     }
 
-    static ConfigMap of(final Map<String, ? extends Object> contents) {
+    /**
+     * Constructs a ConfigMap instance from Map.
+     *
+     * @param contents Map to construct a ConfigMap instance from
+     * @return ConfigMap instance constructed
+     */
+    public static ConfigMap of(final Map<String, ? extends Object> contents) {
         if (contents instanceof ConfigMap) {
             return (ConfigMap) contents;
         }
