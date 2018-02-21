@@ -1,4 +1,4 @@
-package org.microost.poco.core.internal;
+package org.microost.poco.core;
 
 import static org.junit.Assert.assertEquals;
 
