@@ -1,18 +1,49 @@
 package org.microost.poco.core.internal;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 
+/**
+ * Immutable List which consists only of String, ConfigList, and ConfigMap.
+ */
 final class ConfigList implements List<Object> {
     private ConfigList(final List<Object> contents) {
         this.contents = contents;
     }
 
     static ConfigList of(final List<Object> contents) {
-        // TODO: Deep clone with checking the contents are ConfigList, ConfigMap, or String.
-        return new ConfigList(contents);
+        if (contents instanceof ConfigList) {
+            return (ConfigList) contents;
+        }
+
+        final ArrayList<Object> built = new ArrayList<>();
+        for (final Object value : contents) {
+            if (value instanceof String
+                        || value instanceof ConfigList
+                        || value instanceof ConfigMap) {
+                built.add(value);
+            } else if (value instanceof List) {
+                @SuppressWarnings("unchecked")
+                final List<Object> valueList = (List<Object>) value;
+                built.add(ConfigList.of(valueList));
+            } else if (value instanceof Map) {
+                @SuppressWarnings("unchecked")
+                final Map<String, Object> valueMap = (Map<String, Object>) value;
+                built.add(ConfigMap.of(valueMap));
+            } else {
+                if (value instanceof Collection) {
+                    throw new IllegalArgumentException("Unordered java.util.Collection cannot be used for ConfigList.");
+                } else {
+                    throw new IllegalArgumentException(value.getClass().toString() + " cannot be used.");
+                }
+            }
+        }
+        return new ConfigList(Collections.unmodifiableList(built));
     }
 
     // Query Operations
@@ -158,6 +189,11 @@ final class ConfigList implements List<Object> {
     @Override
     public ConfigList subList(final int fromIndex, final int toIndex) {
         return new ConfigList(this.contents.subList(fromIndex, toIndex));
+    }
+
+    @Override
+    public String toString() {
+        return this.contents.toString();
     }
 
     private static final int CLASS_HASH_CODE = ConfigList.class.hashCode();
