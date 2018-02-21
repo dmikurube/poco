@@ -10,8 +10,13 @@ import java.util.Map;
 
 /**
  * Immutable List which consists only of String, ConfigList, and ConfigMap.
+ *
+ * <p>This class is {@code public} so that third-party extending libraries like Binders can handle
+ * this. It is however usually discouraged for users to use this {@link ConfigList} class directly.
+ * For example, using this class in method signatures would force callers to depend explicitly on
+ * this library and {@link ConfigList}.
  */
-final class ConfigList implements List<Object> {
+public final class ConfigList implements List<Object> {
     private ConfigList(final ArrayList<Object> contents) {
         this.contents = Collections.unmodifiableList(contents);
     }
@@ -20,7 +25,13 @@ final class ConfigList implements List<Object> {
         this.contents = Collections.unmodifiableList(contents);
     }
 
-    static ConfigList of(final List<? extends Object> contents) {
+    /**
+     * Constructs a ConfigList instance from List.
+     *
+     * @param contents List to construct a ConfigList instance from
+     * @return ConfigList instance constructed
+     */
+    public static ConfigList of(final List<? extends Object> contents) {
         if (contents instanceof ConfigList) {
             return (ConfigList) contents;
         }
